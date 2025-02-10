@@ -9,7 +9,9 @@ import {PostModel} from "./models/posts.model";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  loadedPosts = [];
+  loadedPosts:PostModel[] = [];
+
+  isFetchingPostsInProgress : boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -31,6 +33,8 @@ export class AppComponent implements OnInit {
 
   onFetchPosts() {
 
+    this.fetchPosts();
+
   }
 
   onClearPosts() {
@@ -39,17 +43,26 @@ export class AppComponent implements OnInit {
 
   public fetchPosts(){
 
+    this.isFetchingPostsInProgress = true;
+
     this.http.get('https://http-requests-backend-default-rtdb.firebaseio.com/posts.json')
-      .pipe(map((responseData: PostModel)=>{
-        const postsArray: PostModel[] = [];
+      .pipe(map((responseData)=>{
+        const postsArray:PostModel[] = [];
         for(const key in responseData){
           if(responseData.hasOwnProperty(key)){
             postsArray.push({...responseData[key],id:key}); // spread operator allows us to combine all properties of response
           }
         }
+        return postsArray;
       })).subscribe({
       next:(responseData)=>{
-        console.log(responseData)
+        this.loadedPosts = responseData;
+      },
+      error:(err)=>{
+        this.isFetchingPostsInProgress = false;
+      },
+      complete:()=>{
+        this.isFetchingPostsInProgress = false;
       }
     });
 
