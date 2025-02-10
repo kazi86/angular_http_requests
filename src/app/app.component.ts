@@ -24,7 +24,13 @@ export class AppComponent implements OnInit {
   }
 
   onFetchPosts() {
-    // Send Http request
+
+    this.http.get('https://http-requests-backend-default-rtdb.firebaseio.com/posts.json').subscribe({
+      next:(responseData)=>{
+        console.log(responseData)
+      }
+    });
+
   }
 
   onClearPosts() {
